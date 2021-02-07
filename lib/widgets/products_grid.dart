@@ -5,11 +5,14 @@ import '../widgets/product_item.dart';
 import '../providers/products.dart';
 
 class ProductsGrid extends StatelessWidget {
+  bool showFavoritesOnly;
+
+  ProductsGrid(this.showFavoritesOnly);
 
   @override
   Widget build(BuildContext context) {
     final productsData = Provider.of<Products>(context);
-    final products = productsData.items;
+    final products = showFavoritesOnly ? productsData.items : productsData.favoriteItems;
 
     return GridView.builder(
       padding: const EdgeInsets.all(10),
