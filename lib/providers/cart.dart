@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 
 import '../providers/product.dart';
@@ -25,6 +23,16 @@ class Cart with ChangeNotifier {
 
   int get itemCount {
     return _items.length;
+  }
+
+  double get totalAmount {
+    double total = 0.0;
+
+    _items.forEach((key, cartItem) {
+      total += cartItem.product.price * cartItem.quantity;
+    });
+
+    return total;
   }
 
   void addItem(Product product) {
