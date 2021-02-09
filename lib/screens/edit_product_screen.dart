@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../providers/product.dart';
+import '../providers/products.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product';
@@ -18,6 +20,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   final _form = GlobalKey<FormState>();
 
+  bool _isInit = true;
+
   Product _editedProduct = Product(
     id: null,
     title: '',
@@ -30,6 +34,19 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void initState() {
     super.initState();
     _imageFocusNode.addListener(_updateImageUrl);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      final productId = ModalRoute.of(context).settings.arguments as String;
+      if (productId != null) {
+        _editedProduct = Provider.of<Products>(context, listen: false).findById(productId);
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+    }
+    _isInit = false;
   }
 
   bool _validImageUrl(value) {
@@ -48,6 +65,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void _saveForm() {
     if(!_form.currentState.validate()) return;
     _form.currentState.save();
+    if (_editedProduct.id == null) {
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    } else {
+      Provider.of<Products>(context, listen: false).updateProduct(_editedProduct);
+    }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -80,6 +103,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           child: ListView(
             children: <Widget>[
               TextFormField(
+                initialValue: _editedProduct.title,
                 decoration: const InputDecoration(
                   labelText: 'Title',
                 ),
@@ -98,10 +122,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     price: _editedProduct.price,
                     description: _editedProduct.description,
                     imageUrl: _editedProduct.imageUrl,
+                    isFavorite: _editedProduct.isFavorite,
                   );
                 },
               ),
               TextFormField(
+                initialValue: _editedProduct.price.toStringAsFixed(2),
                 decoration: const InputDecoration(
                   labelText: 'Price',
                 ),
@@ -124,10 +150,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     price: double.parse(value),
                     description: _editedProduct.description,
                     imageUrl: _editedProduct.imageUrl,
+                    isFavorite: _editedProduct.isFavorite,
                   );
                 }
               ),
               TextFormField(
+                initialValue: _editedProduct.description,
                 decoration: const InputDecoration(
                   labelText: 'Description',
                 ),
@@ -141,6 +169,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     price: _editedProduct.price,
                     description: value,
                     imageUrl: _editedProduct.imageUrl,
+                    isFavorite: _editedProduct.isFavorite,
                   );
                 }
               ),
@@ -186,6 +215,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           price: _editedProduct.price,
                           description: _editedProduct.description,
                           imageUrl: value,
+                          isFavorite: _editedProduct.isFavorite,
                         );
                       },
                     ),
@@ -196,7 +226,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ),
         ),
       ),
-      
     );
   }
 }
