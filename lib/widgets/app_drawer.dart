@@ -6,7 +6,7 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildListTile(BuildContext context, String title, IconData icon, Function handler) {
     return ListTile(
-      leading: Icon(Icons.shop),
+      leading: Icon(icon),
       title: Text(title),
       onTap: handler,
     );
