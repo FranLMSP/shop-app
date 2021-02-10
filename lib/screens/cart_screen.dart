@@ -5,12 +5,53 @@ import '../widgets/cart_list_item.dart';
 import '../providers/cart.dart';
 import '../providers/orders.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   static const routeName = '/cart';
+
+  @override
+  _CartScreenState createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  bool _isLoading = false;
+
+  Future<void> _saveOrder(Orders ordersProvider, Cart cart) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await ordersProvider.addOrder(cart.items.values.toList(), cart.totalAmount);
+      cart.clear();
+    } catch(error) {
+      print(error);
+      setState(() {
+        _isLoading = false;
+      });
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('An error ocurred!'),
+          content: Text('Something went wrong...'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        )
+      );
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<Cart>(context);
+    final ordersProvider = Provider.of<Orders>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text('Your cart'),
@@ -39,11 +80,10 @@ class CartScreen extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   FlatButton(
-                    child: Text('ORDER NOW'),
+                    child: _isLoading ? CircularProgressIndicator() : Text('ORDER NOW'),
                     textColor: Theme.of(context).primaryColor,
-                    onPressed: () {
-                      Provider.of<Orders>(context, listen: false).addOrder(cart.items.values.toList(), cart.totalAmount);
-                      cart.clear();
+                    onPressed: _isLoading || cart.itemCount <= 0 ? null : () {
+                      _saveOrder(ordersProvider, cart);
                     },
                   ),
                 ],
