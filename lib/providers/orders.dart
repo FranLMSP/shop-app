@@ -5,7 +5,7 @@ import 'dart:convert';
 import './cart.dart';
 import './product.dart';
 
-class OrderItem with ChangeNotifier {
+class OrderItem {
   final String id;
   final double amount;
   final DateTime dateTime;
@@ -20,6 +20,12 @@ class OrderItem with ChangeNotifier {
 }
 
 class Orders with ChangeNotifier {
+
+  Orders(this.authToken, this.userId, this._orders);
+
+  final String authToken;
+  final String userId;
+
   List<OrderItem> _orders = [];
 
   List<OrderItem> get orders {
@@ -27,7 +33,7 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetOrders() async {
-    const url = 'https://shop-app-test-5aef2-default-rtdb.firebaseio.com/orders.json';
+    final url = 'https://shop-app-test-5aef2-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken';
     try {
       final List<OrderItem> loadedCartItems = [];
       final response = await http.get(url);
@@ -68,7 +74,7 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
-    const url = 'https://shop-app-test-5aef2-default-rtdb.firebaseio.com/orders.json';
+    final url = 'https://shop-app-test-5aef2-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken';
     final dateTime = DateTime.now();
     try {
       final response = await http.post(url, body: json.encode({

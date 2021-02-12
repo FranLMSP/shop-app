@@ -23,7 +23,6 @@ class _CartScreenState extends State<CartScreen> {
       await ordersProvider.addOrder(cart.items.values.toList(), cart.totalAmount);
       cart.clear();
     } catch(error) {
-      print(error);
       setState(() {
         _isLoading = false;
       });

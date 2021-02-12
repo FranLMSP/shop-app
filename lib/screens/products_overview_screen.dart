@@ -14,6 +14,7 @@ enum FilterOptions {
 }
 
 class ProductsOverviewScreen extends StatefulWidget {
+  static const String routeName = '/products';
   @override
   _ProductsOverviewScreenState createState() => _ProductsOverviewScreenState();
 }
@@ -22,6 +23,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   bool _showFavoritesOnly = false;
   bool _isInit = true;
   bool _isLoading = false;
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -31,19 +33,25 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_isInit) {
+    if (_isInit && !_disposed) {
       setState(() {
         _isLoading = true;
-        print(_isLoading);
       });
-      Provider.of<Products>(context).fetchAndSetProducts().then((_) {
-        setState(() {
-          _isLoading = false;
-          print(_isLoading);
-        });
+      Provider.of<Products>(context, listen: false).fetchAndSetProducts().then((_) {
+        if (!_disposed) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       });
     }
     _isInit = false;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _disposed = true;
   }
 
   @override
